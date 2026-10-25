@@ -3,6 +3,18 @@ __pycache__/
 *.py[codz]
 *$py.class
 
+# IDE files
+.idea/
+.vscode/
+
+# AI files
+.claude/
+CLAUDE.md
+
+# Project reference files
+materiais_projeto_consulta/
+guide/
+
 # C extensions
 *.so
 
