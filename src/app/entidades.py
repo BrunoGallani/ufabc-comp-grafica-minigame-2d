@@ -1,4 +1,4 @@
-import math
+import numpy as np
 
 from config import (
     ALTURA_JOGADOR, ALTURA_PLATAFORMA, COR_FRAGIL, COR_FRAGIL_BORDA, COR_JOGADOR,
@@ -92,10 +92,10 @@ class Moeda:
 
     @property
     def centro(self):
-        return (self.x, self.y + FLUTUACAO_MOEDA * math.sin(2.0 * self.tempo))
+        return (self.x, self.y + FLUTUACAO_MOEDA * np.sin(2.0 * self.tempo))
 
     def desenhar(self, render):
-        giro = max(0.15, abs(math.cos(VEL_GIRO_MOEDA * self.tempo)))
+        giro = max(0.15, abs(np.cos(VEL_GIRO_MOEDA * self.tempo)))
         render.elipse(self.centro, (RAIO_MOEDA * giro, RAIO_MOEDA), COR_MOEDA)
         render.elipse(self.centro, (0.55 * RAIO_MOEDA * giro, 0.55 * RAIO_MOEDA),
                       COR_MOEDA_MIOLO)

@@ -1,9 +1,9 @@
-import math
 import sys
 from enum import Enum
 
 import glfw
 import moderngl
+import numpy as np
 
 from config import (
     ALTURA_JANELA, ATENUACAO_FORA_DO_JOGO, COR_DESTAQUE, COR_FIM, COR_PLACAR, DT_MAXIMO,
@@ -117,7 +117,7 @@ class Jogo:
             self._icone_jogar(-0.28)
 
     def _icone_jogar(self, y):
-        pulso = 1.0 + 0.12 * math.sin(2.0 * math.pi * 1.2 * self.tempo_tela)
+        pulso = 1.0 + 0.12 * np.sin(2.0 * np.pi * 1.2 * self.tempo_tela)
         self.render.triangulo((0.0, y), 0.22 * pulso, COR_DESTAQUE)
 
     def executar(self):

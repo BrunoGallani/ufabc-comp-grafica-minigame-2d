@@ -1,5 +1,6 @@
-import math
 import random
+
+import numpy as np
 
 from colisao import circulo_toca_retangulo, cruzou_topo, sobrepoe_intervalo
 from config import (
@@ -116,8 +117,8 @@ class Partida:
 
     def desenhar(self, render):
         render.usar_camera(self.camera_y)
-        primeira = math.floor((self.camera_y - MEIA_ALTURA_TELA) / ESPACO_GRADE)
-        ultima = math.ceil((self.camera_y + MEIA_ALTURA_TELA) / ESPACO_GRADE)
+        primeira = int(np.floor((self.camera_y - MEIA_ALTURA_TELA) / ESPACO_GRADE))
+        ultima = int(np.ceil((self.camera_y + MEIA_ALTURA_TELA) / ESPACO_GRADE))
         for k in range(primeira, ultima + 1):
             render.retangulo((0.0, k * ESPACO_GRADE), (2 * MEIA_LARGURA_TELA, 0.004), COR_GRADE)
         for plataforma in self.plataformas:
