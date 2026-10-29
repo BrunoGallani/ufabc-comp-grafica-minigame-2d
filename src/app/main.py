@@ -11,7 +11,7 @@ Teclas:
     P                             pausa e retoma
     R                             reinicia (volta ao início)
     V                             liga e desliga o vsync (fps na barra de título)
-    ESC                           sai
+    ESC                           pede para sair (ENTER confirma, ESC de novo volta)
 """
 import sys
 

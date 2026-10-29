@@ -59,6 +59,7 @@ PONTOS_POR_UNIDADE = 10
 ALTURA_DIGITO_HUD = 0.07
 TEXTO_INICIO, TEXTO_PAUSA, TEXTO_FIM = "PULE", "PAUSA", "PERDEU"
 TEXTO_RECORDES = "RECORDES"
+TEXTO_SAIR = "SAIR"
 TOTAL_RECORDES = 5
 # Na raiz do projeto (src/app/config.py -> src/app -> src -> raiz).
 ARQUIVO_RECORDES = Path(__file__).resolve().parents[2] / "recordes.json"

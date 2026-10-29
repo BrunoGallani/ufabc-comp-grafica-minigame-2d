@@ -1,4 +1,4 @@
-"""Estados do jogo (início, jogando, pausa, fim), teclado e o que cada tela mostra."""
+"""Estados do jogo (início, jogando, pausa, fim, saída), teclado e o que cada tela mostra."""
 from enum import Enum
 
 import glfw
@@ -7,7 +7,7 @@ import numpy as np
 
 from config import (
     ATENUACAO_FORA_DO_JOGO, COR_DESTAQUE, COR_FIM, COR_PLACAR, FUNDO, NOME_JOGO, TEXTO_FIM,
-    TEXTO_INICIO, TEXTO_PAUSA,
+    TEXTO_INICIO, TEXTO_PAUSA, TEXTO_SAIR,
 )
 from partida import Partida
 from placar import Placar
@@ -20,6 +20,7 @@ class Estado(Enum):
     JOGANDO = "jogando"
     PAUSADO = "pausado"
     FIM = "fim de jogo"
+    SAINDO = "sair?"
 
 
 # P só alterna entre jogando e pausado; nos outros estados não faz nada.
@@ -27,7 +28,9 @@ PAUSA = {Estado.JOGANDO: Estado.PAUSADO, Estado.PAUSADO: Estado.JOGANDO}
 
 TECLAS_DIREITA = (glfw.KEY_RIGHT, glfw.KEY_D)
 TECLAS_ESQUERDA = (glfw.KEY_LEFT, glfw.KEY_A)
-TECLAS_CONFIRMAR = (glfw.KEY_ENTER, glfw.KEY_KP_ENTER, glfw.KEY_SPACE)
+TECLAS_ENTER = (glfw.KEY_ENTER, glfw.KEY_KP_ENTER)
+# Tecla e efeito, mostrados na tela de saída.
+DICAS_SAIDA = (("ENTER", "SAI"), ("ESC", "FICA"))
 
 
 class Jogo:
@@ -41,11 +44,12 @@ class Jogo:
 
         # Tecla nova = um método + uma linha aqui.
         self.acoes = {
-            glfw.KEY_ESCAPE: self.sair,
+            glfw.KEY_ESCAPE: self.alternar_saida,
             glfw.KEY_V: self.alternar_vsync,
             glfw.KEY_P: self.alternar_pausa,
             glfw.KEY_R: self.reiniciar,
-            **dict.fromkeys(TECLAS_CONFIRMAR, self.confirmar),
+            glfw.KEY_SPACE: self.jogar,
+            **dict.fromkeys(TECLAS_ENTER, self.confirmar),
         }
 
     # ------------------------------------------------------------------ teclado
@@ -58,6 +62,13 @@ class Jogo:
     def sair(self) -> None:
         glfw.set_window_should_close(self.janela, True)
 
+    def alternar_saida(self) -> None:
+        """ESC pergunta antes de fechar; ESC de novo volta para onde estava."""
+        if self.estado == Estado.SAINDO:
+            self.estado = self.estado_anterior
+        else:
+            self.estado_anterior, self.estado = self.estado, Estado.SAINDO
+
     def alternar_vsync(self) -> None:
         self.vsync = not self.vsync
         glfw.swap_interval(int(self.vsync))
@@ -66,14 +77,22 @@ class Jogo:
         self.estado = PAUSA.get(self.estado, self.estado)
 
     def reiniciar(self) -> None:
-        self.nova_partida(Estado.INICIO)
+        if self.estado != Estado.SAINDO:   # na pergunta de saída só ENTER e ESC valem
+            self.nova_partida(Estado.INICIO)
 
-    def confirmar(self) -> None:
+    def jogar(self) -> None:
         match self.estado:
             case Estado.INICIO:
                 self.estado = Estado.JOGANDO
             case Estado.FIM:
                 self.nova_partida(Estado.JOGANDO)
+
+    def confirmar(self) -> None:
+        """ENTER joga, como o ESPAÇO, e é a única tecla que confirma a saída."""
+        if self.estado == Estado.SAINDO:
+            self.sair()
+        else:
+            self.jogar()
 
     def nova_partida(self, estado: Estado) -> None:
         self.partida = Partida()
@@ -96,7 +115,7 @@ class Jogo:
                 self.estado = Estado.FIM
                 self.tempo_tela = 0.0
                 self.posicao_recorde = self.recordes.registrar(self.partida.pontuacao)
-        elif self.estado != Estado.PAUSADO:
+        elif self.estado in (Estado.INICIO, Estado.FIM):
             self.tempo_tela += dt   # anima as telas de início e fim
 
     def desenhar(self) -> None:
@@ -124,6 +143,15 @@ class Jogo:
                 self.placar.desenhar_recordes(self.recordes.pontos, self.posicao_recorde,
                                               0.22, self._pulso())
                 self._icone_jogar(-0.66)
+            case Estado.SAINDO:
+                # Caixa da cor do fundo: esconde a cena atrás do aviso.
+                self.render.retangulo((0.0, 0.0), (0.76, 0.54), FUNDO)
+                self.render.contorno((0.0, 0.0), (0.76, 0.54), COR_FIM)
+                self.placar.escrever(TEXTO_SAIR, 0.0, 0.13, 0.12, COR_FIM, 'centro')
+                for i, (nome_tecla, efeito) in enumerate(DICAS_SAIDA):
+                    y = -0.05 - 0.13 * i
+                    self.placar.escrever(nome_tecla, -0.28, y, 0.06, COR_DESTAQUE)
+                    self.placar.escrever(efeito, 0.28, y, 0.06, COR_PLACAR, 'direita')
 
     def _pulso(self) -> float:
         return 1.0 + 0.12 * np.sin(2.0 * np.pi * 1.2 * self.tempo_tela)

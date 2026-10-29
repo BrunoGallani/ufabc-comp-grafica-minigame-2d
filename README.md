@@ -30,4 +30,4 @@ Também dá para rodar pelo botão de executar do editor, com o arquivo `src/app
 | P | pausa e retoma |
 | R | reinicia (volta ao início) |
 | V | liga e desliga o vsync (fps na barra de título) |
-| ESC | sai |
+| ESC | pede para sair: ENTER confirma, ESC de novo volta para onde estava |
