@@ -6,6 +6,8 @@ Projeto de minigame 2D desenvolvido em Python e OpenGL para a atividade 3 da dis
 
 Jogo vertical no estilo *Doodle Jump*: o personagem quica sozinho nas plataformas e o jogador o guia para os lados. A tela só sobe, e cair pela borda de baixo encerra a partida. O mundo é infinito e fica mais difícil com a altura e com o tempo.
 
+Algumas plataformas têm uma mola: pisando nela, ela estica e lança o personagem quase uma tela para cima. No fim da partida aparece a tabela com as 5 melhores pontuações, com a da partida atual em destaque; os recordes ficam salvos em `recordes.json`, na raiz do projeto.
+
 ## Como executar
 
 Com Python 3.11, na raiz do repositório:
