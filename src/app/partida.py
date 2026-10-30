@@ -47,6 +47,11 @@ class Partida:
         self._gerar_acima()
 
     @property
+    def comecou(self) -> bool:
+        """Já foi jogada? A do fundo do menu, antes do INICIAR, ainda não."""
+        return self.tempo > 0.0
+
+    @property
     def pontuacao(self) -> int:
         return int(self.altura_max * PONTOS_POR_UNIDADE) + BONUS_MOEDA * self.moedas_coletadas
 
