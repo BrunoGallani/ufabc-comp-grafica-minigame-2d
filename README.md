@@ -8,6 +8,8 @@ Jogo vertical no estilo *Doodle Jump*: o personagem quica sozinho nas plataforma
 
 Algumas plataformas têm uma mola: pisando nela, ela estica e lança o personagem quase uma tela para cima. No fim da partida aparece a tabela com as 5 melhores pontuações, com a da partida atual em destaque; os recordes ficam salvos em `recordes.json`, na raiz do projeto.
 
+O jogo abre num menu com o nome do jogo e as opções INICIAR, RECORDES e SAIR. No meio da partida, o ESC abre um diálogo com CONTINUAR, INICIO (volta ao menu) e SAIR. Quem volta ao menu deixa a partida guardada e pode retomá-la de onde parou pela opção CONTINUAR, que só aparece nesse caso. Se escolher INICIAR, a partida guardada é descartada e não entra nos recordes. Na tela de fim de jogo, JOGAR começa outra partida e INICIO volta ao menu.
+
 ## Como executar
 
 Com Python 3.11, na raiz do repositório:
@@ -25,10 +27,10 @@ Também dá para rodar pelo botão de executar do editor, com o arquivo `src/app
 
 | Tecla | Ação |
 | --- | --- |
+| ↑ / ↓ | escolhem a opção nos menus |
+| ENTER | confirma a opção escolhida |
 | ← / → ou A / D | movem o personagem |
-| ENTER ou ESPAÇO | começa a partida / joga de novo no fim |
 | P | pausa e retoma |
-| R | reinicia (volta ao início) |
+| R | reinicia (começa outra partida na hora) |
 | V | liga e desliga o vsync (fps na barra de título) |
-| F | liga e desliga a tela cheia (o jogo fica no centro, com faixas pretas nas laterais) |
-| ESC | pede para sair: ENTER confirma, ESC de novo volta para onde estava |
+| ESC | abre o diálogo CONTINUAR / INICIO / SAIR; ESC de novo volta para onde estava. Nos recordes, volta ao menu |

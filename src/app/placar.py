@@ -1,6 +1,6 @@
 """
 Texto em display de 7 segmentos, feito com o mesmo retângulo das plataformas:
-o placar do HUD, os títulos das telas e a tabela de recordes.
+o placar do HUD, os títulos das telas, as listas de opções e a tabela de recordes.
 """
 from config import (
     ALTURA_DIGITO_HUD, COR_DESTAQUE, COR_MOEDA, COR_PLACAR, MEIA_ALTURA_TELA,
@@ -22,6 +22,7 @@ SEGMENTOS = {
 LARGURA_CARACTERE = 0.55
 ESPESSURA_SEGMENTO = 0.16
 ESPACO_CARACTERES = 0.30
+ENTRELINHA = 2.0
 
 # Quanto da largura do texto fica à esquerda do x pedido.
 ALINHAMENTOS = {'esquerda': 0.0, 'centro': 0.5, 'direita': 1.0}
@@ -71,6 +72,20 @@ class Placar:
             self.escrever(str(moedas), x, y, ALTURA_DIGITO_HUD, COR_MOEDA, 'direita')
             x_icone = x - self.largura(str(moedas), ALTURA_DIGITO_HUD) - 0.045
             self.render.circulo((x_icone, y), 0.028, COR_MOEDA)
+
+    def desenhar_opcoes(self, textos: list[str], escolhida: int, y: float, altura: float,
+                        pulso: float) -> None:
+        """
+        Uma opção por linha, a partir de `y` para baixo, alinhadas à esquerda e com o
+        bloco centrado na tela. A escolhida ganha a cor de destaque e uma seta pulsando.
+        """
+        x = -max(self.largura(texto, altura) for texto in textos) / 2
+        for i, texto in enumerate(textos):
+            y_linha = y - ENTRELINHA * altura * i
+            cor = COR_DESTAQUE if i == escolhida else COR_PLACAR
+            self.escrever(texto, x, y_linha, altura, cor)
+            if i == escolhida:
+                self.render.triangulo((x - 1.5 * altura, y_linha), altura * pulso, cor)
 
     def desenhar_recordes(self, pontos: list[int], destaque: int | None, y: float,
                           pulso: float) -> None:
