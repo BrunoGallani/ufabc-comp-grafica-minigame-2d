@@ -40,7 +40,6 @@ def criar_janela() -> 'glfw._GLFWwindowPointerT':
     glfw.window_hint(glfw.OPENGL_PROFILE, glfw.OPENGL_CORE_PROFILE)
     glfw.window_hint(glfw.OPENGL_FORWARD_COMPAT, glfw.TRUE)   # sem isso não roda no macOS
     glfw.window_hint(glfw.SAMPLES, 4)                         # antialiasing
-    glfw.window_hint(glfw.RESIZABLE, False)
     glfw.window_hint(glfw.AUTO_ICONIFY, False)                # tela cheia não minimiza sem foco
 
     janela = glfw.create_window(LARGURA_JANELA, ALTURA_JANELA, NOME_JOGO, None, None)
