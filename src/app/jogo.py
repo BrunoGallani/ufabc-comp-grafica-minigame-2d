@@ -10,8 +10,8 @@ import moderngl
 import numpy as np
 
 from config import (
-    ATENUACAO_FORA_DO_JOGO, COR_DESTAQUE, COR_FIM, COR_PLACAR, FUNDO, NOME_JOGO, TEXTO_FIM,
-    TEXTO_PAUSA,
+    ALTURA_JANELA, ATENUACAO_FORA_DO_JOGO, COR_DESTAQUE, COR_FIM, COR_PLACAR, FUNDO,
+    LARGURA_JANELA, NOME_JOGO, TEXTO_FIM, TEXTO_PAUSA,
 )
 from menu import Menu, Opcao
 from partida import Partida
@@ -59,6 +59,7 @@ class Jogo:
             glfw.KEY_UP: partial(self.mover, -1),
             glfw.KEY_DOWN: partial(self.mover, 1),
             glfw.KEY_V: self.alternar_vsync,
+            glfw.KEY_F: self.alternar_tela_cheia,
             glfw.KEY_P: self.alternar_pausa,
             glfw.KEY_R: self.reiniciar,
             **dict.fromkeys(TECLAS_ENTER, self.confirmar),
@@ -98,6 +99,25 @@ class Jogo:
     def alternar_vsync(self) -> None:
         self.vsync = not self.vsync
         glfw.swap_interval(int(self.vsync))
+
+    def alternar_tela_cheia(self) -> None:
+        """
+        Alterna entre janela e tela cheia no monitor principal. O novo tamanho chega
+        logo depois, pelo callback redimensionar.
+        """
+        monitor = glfw.get_primary_monitor()
+        modo = glfw.get_video_mode(monitor)
+        largura_monitor, altura_monitor = modo.size
+
+        if glfw.get_window_monitor(self.janela):   # volta para a janela, centralizada
+            x = (largura_monitor - LARGURA_JANELA) // 2
+            y = (altura_monitor - ALTURA_JANELA) // 2
+            glfw.set_window_monitor(self.janela, None, x, y, LARGURA_JANELA, ALTURA_JANELA, 0)
+        else:
+            # Com a resolução e a taxa do monitor, o GLFW não troca o modo de vídeo e
+            # a tela não pisca ao entrar.
+            glfw.set_window_monitor(self.janela, monitor, 0, 0, largura_monitor,
+                                    altura_monitor, modo.refresh_rate)
 
     def alternar_pausa(self) -> None:
         self.estado = PAUSA.get(self.estado, self.estado)
@@ -146,6 +166,12 @@ class Jogo:
     def direcao(self) -> float:
         """-1 (esquerda), 0 ou 1 (direita). Lida a cada quadro, não pelo callback."""
         return float(self._apertada(TECLAS_DIREITA)) - float(self._apertada(TECLAS_ESQUERDA))
+
+    # ------------------------------------------------------------------- janela
+    def redimensionar(self, janela: 'glfw._GLFWwindowPointerT', largura: int,
+                      altura: int) -> None:
+        """Callback do GLFW quando a área de desenho muda de tamanho (em pixels)."""
+        self.render.ajustar_viewport(largura, altura)
 
     # -------------------------------------------------------------- cada quadro
     def atualizar(self, dt: float) -> None:

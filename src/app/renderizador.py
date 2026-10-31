@@ -6,7 +6,10 @@ import moderngl
 import numpy as np
 
 import geometria
-from config import ESPIRAS_MOLA, MEIA_ALTURA_TELA, MEIA_LARGURA_TELA, Cor, Par
+from config import (
+    ALTURA_JANELA, COR_FAIXAS, ESPIRAS_MOLA, LARGURA_JANELA, MEIA_ALTURA_TELA,
+    MEIA_LARGURA_TELA, Cor, Par,
+)
 
 SHADERS = Path(__file__).parent / "shaders"
 
@@ -68,8 +71,24 @@ class Renderizador:
         if (uniforme := self.prog.get(nome, None)) is not None:
             uniforme.value = valor
 
+    def ajustar_viewport(self, largura: int, altura: int) -> None:
+        """
+        Desenha no maior retângulo centralizado com a proporção da janela. Com outra
+        proporção o jogo estica e os círculos viram elipses; as sobras dos lados são
+        pintadas em limpar.
+        """
+        if largura == 0 or altura == 0:   # janela minimizada
+            return
+        escala = min(largura / LARGURA_JANELA, altura / ALTURA_JANELA)
+        largura_jogo, altura_jogo = round(LARGURA_JANELA * escala), round(ALTURA_JANELA * escala)
+        self.ctx.viewport = ((largura - largura_jogo) // 2, (altura - altura_jogo) // 2,
+                             largura_jogo, altura_jogo)
+
     def limpar(self, cor: Cor) -> None:
-        self.ctx.clear(*cor)
+        # O clear ignora o viewport: pinta tudo com a cor das faixas e depois só a
+        # área do jogo com a cor do fundo.
+        self.ctx.clear(*COR_FAIXAS)
+        self.ctx.clear(*cor, viewport=self.ctx.viewport)
 
     def usar_camera(self, camera_y: float) -> None:
         self.ajustar('u_camera', (0.0, camera_y))

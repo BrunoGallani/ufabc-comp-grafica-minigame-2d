@@ -66,6 +66,7 @@ ATENUACAO_FORA_DO_JOGO = 0.4
 ESPACO_GRADE = 0.25
 
 FUNDO = (0.04, 0.05, 0.09, 1.0)
+COR_FAIXAS = (0.0, 0.0, 0.0, 1.0)   # sobras dos lados na tela cheia
 COR_GRADE = (0.09, 0.11, 0.18, 1.0)
 COR_JOGADOR = (0.95, 0.35, 0.60, 1.0)
 COR_OLHO = (1.0, 1.0, 1.0, 1.0)
