@@ -6,12 +6,14 @@ Executar:
     python src/app/main.py
 
 Teclas:
+    CIMA / BAIXO                  escolhem a opção nos menus
+    ENTER                         confirma a opção escolhida
     ESQUERDA / DIREITA ou A / D   movem o personagem
-    ENTER ou ESPAÇO               começa a partida / joga de novo no fim
     P                             pausa e retoma
-    R                             reinicia (volta ao início)
+    R                             reinicia (começa outra partida na hora)
     V                             liga e desliga o vsync (fps na barra de título)
-    ESC                           pede para sair (ENTER confirma, ESC de novo volta)
+    ESC                           abre o diálogo CONTINUAR / INICIO / SAIR (ESC de novo volta);
+                                  nos recordes, volta ao menu
 """
 import sys
 
