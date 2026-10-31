@@ -11,6 +11,7 @@ Teclas:
     P                             pausa e retoma
     R                             reinicia (volta ao início)
     V                             liga e desliga o vsync (fps na barra de título)
+    F                             liga e desliga a tela cheia
     ESC                           pede para sair (ENTER confirma, ESC de novo volta)
 """
 import sys
@@ -38,6 +39,7 @@ def criar_janela() -> 'glfw._GLFWwindowPointerT':
     glfw.window_hint(glfw.OPENGL_FORWARD_COMPAT, glfw.TRUE)   # sem isso não roda no macOS
     glfw.window_hint(glfw.SAMPLES, 4)                         # antialiasing
     glfw.window_hint(glfw.RESIZABLE, False)
+    glfw.window_hint(glfw.AUTO_ICONIFY, False)                # tela cheia não minimiza sem foco
 
     janela = glfw.create_window(LARGURA_JANELA, ALTURA_JANELA, NOME_JOGO, None, None)
     if not janela:
@@ -73,6 +75,9 @@ def main() -> None:
     janela = criar_janela()
     jogo = Jogo(moderngl.create_context(), janela)
     glfw.set_key_callback(janela, jogo.tecla)
+    glfw.set_framebuffer_size_callback(janela, jogo.redimensionar)
+    # O callback só roda quando o tamanho muda, então o primeiro viewport vai na mão.
+    jogo.redimensionar(janela, *glfw.get_framebuffer_size(janela))
     try:
         executar(jogo, janela)
     finally:   # libera a GPU e fecha a janela mesmo se der erro no meio
