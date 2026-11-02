@@ -9,8 +9,7 @@ Executar:
 
 Teclas:
     CIMA / BAIXO                  escolhem a opção nos menus e a skin na loja
-    ENTER ou ESPAÇO               confirma a opção escolhida (na loja, compra ou usa a skin);
-                                  na pausa, retoma a partida
+    ENTER ou ESPAÇO               confirma a opção escolhida (na loja, compra ou usa a skin)
     ESQUERDA / DIREITA ou A / D   movem o personagem
     P                             pausa e retoma
     R                             reinicia (começa outra partida na hora)

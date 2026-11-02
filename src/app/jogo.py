@@ -93,10 +93,8 @@ class Jogo:
             menu.mover(passo)
 
     def confirmar(self) -> None:
-        """ENTER/ESPAÇO executa a opção escolhida, nas telas que têm lista; na pausa, retoma."""
-        if self.estado == Estado.PAUSADO:
-            self.estado = Estado.JOGANDO
-        elif menu := self.menus.get(self.estado):
+        """ENTER/ESPAÇO executa a opção escolhida, nas telas que têm lista."""
+        if menu := self.menus.get(self.estado):
             menu.confirmar()
 
     def voltar(self) -> None:

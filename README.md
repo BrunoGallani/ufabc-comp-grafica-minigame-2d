@@ -32,7 +32,7 @@ Também dá para rodar pelo botão de executar do editor, com o arquivo `src/app
 | Tecla | Ação |
 | --- | --- |
 | ↑ / ↓ | escolhem a opção nos menus e a skin na loja |
-| ENTER ou ESPAÇO | confirma a opção escolhida (na loja, compra ou usa a skin); na pausa, retoma a partida |
+| ENTER ou ESPAÇO | confirma a opção escolhida (na loja, compra ou usa a skin) |
 | ← / → ou A / D | movem o personagem |
 | P | pausa e retoma |
 | R | reinicia (começa outra partida na hora) |
