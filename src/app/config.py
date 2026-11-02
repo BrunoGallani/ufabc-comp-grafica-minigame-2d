@@ -63,7 +63,7 @@ AVISO_SEM_SALDO = 0.8    # segundos com o saldo em vermelho quando faltam moedas
 PONTOS_POR_UNIDADE = 10
 ALTURA_DIGITO_HUD = 0.07
 TEXTO_PAUSA, TEXTO_FIM = "PAUSA", "PERDEU"
-TEXTO_RECORDES, TEXTO_LOJA = "RECORDES", "LOJA"
+TEXTO_RECORDES, TEXTO_LOJA, TEXTO_TUTORIAL = "RECORDES", "LOJA", "TUTORIAL"
 TOTAL_RECORDES = 5
 # Arquivos na raiz do projeto (src/app/config.py -> src/app -> src -> raiz).
 RAIZ = Path(__file__).resolve().parents[2]

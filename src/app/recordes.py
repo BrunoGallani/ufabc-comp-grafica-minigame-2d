@@ -1,9 +1,19 @@
-"""As melhores pontuações, guardadas em JSON para sobreviverem entre execuções."""
+"""
+As melhores pontuações: guardadas em JSON, para sobreviverem entre execuções, e
+mostradas numa tabela.
+"""
+from __future__ import annotations
+
 import json
 import sys
 from pathlib import Path
+from typing import TYPE_CHECKING
 
-from config import ARQUIVO_RECORDES, TOTAL_RECORDES
+from config import ARQUIVO_RECORDES, COR_DESTAQUE, COR_PLACAR, TEXTO_RECORDES, TOTAL_RECORDES
+
+if TYPE_CHECKING:
+    from display import Display
+    from renderizador import Renderizador
 
 
 class Recordes:
@@ -36,3 +46,19 @@ class Recordes:
         except OSError as erro:   # sem salvar, o recorde ainda vale nesta execução
             print(f"não foi possível salvar os recordes em {self.arquivo}: {erro}", file=sys.stderr)
         return posicao
+
+    def desenhar(self, render: Renderizador, display: Display, destaque: int | None, y: float,
+                 pulso: float) -> None:
+        """
+        Tabela com as posições vazias como "-". A linha `destaque` (a da partida que
+        acabou) ganha a cor de destaque e uma seta pulsando.
+        """
+        display.escrever(TEXTO_RECORDES, 0.0, y, 0.07, COR_DESTAQUE, 'centro')
+        for i in range(TOTAL_RECORDES):
+            y_linha = y - 0.16 - 0.12 * i
+            cor = COR_DESTAQUE if i == destaque else COR_PLACAR
+            texto = str(self.pontos[i]) if i < len(self.pontos) else '-'
+            display.escrever(str(i + 1), -0.28, y_linha, 0.06, cor)
+            display.escrever(texto, 0.32, y_linha, 0.06, cor, 'direita')
+            if i == destaque:
+                render.triangulo((-0.38, y_linha), 0.07 * pulso, cor)

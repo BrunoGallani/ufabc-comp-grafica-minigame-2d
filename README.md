@@ -12,7 +12,7 @@ Cada moeda coletada vale 10 pontos e fica guardada. Quando a partida acaba, o jo
 
 As moedas guardadas compram skin na LOJA do menu: GALAXIA (50 moedas), BRASIL (75), ARCO-IRIS (80), OURO (150) e PLATINA (300). Na loja, ENTER compra a skin escolhida e já passa a usá-la; numa skin já comprada, só troca. Quem não comprou nenhuma usa a skin PADRAO. As compras e a skin em uso ficam em `skins.json`, também na raiz.
 
-O jogo abre num menu com o nome do jogo e as opções INICIAR, LOJA, RECORDES e SAIR. No meio da partida, o ESC abre um diálogo com CONTINUAR, INICIO (volta ao menu) e SAIR. Quem volta ao menu deixa a partida guardada e pode retomá-la de onde parou pela opção CONTINUAR, que só aparece nesse caso. Se escolher INICIAR, a partida guardada é descartada: não entra nos recordes nem guarda as moedas. Na tela de fim de jogo, JOGAR começa outra partida e INICIO volta ao menu.
+O jogo abre num menu com o nome do jogo e as opções INICIAR, TUTORIAL, LOJA, RECORDES e SAIR. O TUTORIAL mostra as teclas e o que cada uma faz. No meio da partida, o ESC abre um diálogo com CONTINUAR, INICIO (volta ao menu) e SAIR. Quem volta ao menu deixa a partida guardada e pode retomá-la de onde parou pela opção CONTINUAR, que só aparece nesse caso. Se escolher INICIAR, a partida guardada é descartada: não entra nos recordes nem guarda as moedas. Na tela de fim de jogo, JOGAR começa outra partida e INICIO volta ao menu.
 
 ## Como executar
 
@@ -38,4 +38,4 @@ Também dá para rodar pelo botão de executar do editor, com o arquivo `src/app
 | R | reinicia (começa outra partida na hora) |
 | V | liga e desliga o vsync (fps na barra de título) |
 | F | liga e desliga a tela cheia |
-| ESC | abre o diálogo CONTINUAR / INICIO / SAIR; ESC de novo volta para onde estava. Nos recordes e na loja, volta ao menu |
+| ESC | abre o diálogo CONTINUAR / INICIO / SAIR; ESC de novo volta para onde estava. Nos recordes, na loja e no tutorial, volta ao menu |
