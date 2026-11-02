@@ -1,6 +1,6 @@
 """
-Estados do jogo (menu, recordes, jogando, pausa, fim e o diálogo do ESC), teclado
-e o que cada tela mostra.
+Estados do jogo (menu, loja, recordes, jogando, pausa, fim e o diálogo do ESC),
+teclado e o que cada tela mostra.
 """
 from enum import Enum
 from functools import partial
@@ -9,19 +9,23 @@ import glfw
 import moderngl
 import numpy as np
 
+from carteira import Carteira
 from config import (
-    ALTURA_JANELA, ATENUACAO_FORA_DO_JOGO, COR_DESTAQUE, COR_FIM, COR_PLACAR, FUNDO,
-    LARGURA_JANELA, NOME_JOGO, TEXTO_FIM, TEXTO_PAUSA,
+    ALTURA_JANELA, ATENUACAO_FORA_DO_JOGO, AVISO_SEM_SALDO, COR_DESTAQUE, COR_FIM, COR_MOEDA,
+    COR_PLACAR, FUNDO, LARGURA_JANELA, NOME_JOGO, TEXTO_FIM, TEXTO_LOJA, TEXTO_PAUSA,
 )
+from loja import Loja
 from menu import Menu, Opcao
 from partida import Partida
 from placar import Placar
 from recordes import Recordes
 from renderizador import Renderizador
+from skins import SKINS, Skin
 
 
 class Estado(Enum):
     MENU = "menu"
+    LOJA = "loja"
     RECORDES = "recordes"
     JOGANDO = "jogando"
     PAUSADO = "pausado"
@@ -31,6 +35,8 @@ class Estado(Enum):
 
 # P só alterna entre jogando e pausado; nos outros estados não faz nada.
 PAUSA = {Estado.JOGANDO: Estado.PAUSADO, Estado.PAUSADO: Estado.JOGANDO}
+# Fora da partida, o canto do placar mostra as moedas guardadas na carteira.
+TELAS_DO_MENU = (Estado.MENU, Estado.LOJA, Estado.RECORDES)
 
 TECLAS_DIREITA = (glfw.KEY_RIGHT, glfw.KEY_D)
 TECLAS_ESQUERDA = (glfw.KEY_LEFT, glfw.KEY_A)
@@ -43,8 +49,11 @@ class Jogo:
         self.render = Renderizador(ctx)
         self.placar = Placar(self.render)
         self.recordes = Recordes()
+        self.carteira = Carteira()
+        self.loja = Loja(self.carteira)
         self.vsync = True
-        self.relogio = 0.0             # anima as setas que pulsam
+        self.relogio = 0.0             # anima as setas que pulsam e as skins da loja
+        self.aviso_saldo = 0.0         # enquanto > 0, o saldo fica vermelho: faltaram moedas
         self.posicao_recorde = None    # na tabela de recordes, quando a partida acaba
         self.estado_anterior = Estado.JOGANDO   # para onde o CONTINUAR volta
         # As opções de cada tela que tem lista. Ficam guardadas: o diálogo do ESC
@@ -86,8 +95,8 @@ class Jogo:
         match self.estado:
             case Estado.DIALOGO:
                 self.continuar()
-            case Estado.RECORDES:
-                self.fechar_recordes()
+            case Estado.RECORDES | Estado.LOJA:
+                self.voltar_ao_menu()
             case Estado.MENU:
                 pass   # para sair do jogo, a opção SAIR
             case _:    # jogando, pausado ou no fim
@@ -131,13 +140,17 @@ class Jogo:
         """Menu principal. Com uma partida guardada (começou e não acabou), oferece CONTINUAR."""
         if self.partida.terminou:
             self.partida = Partida()   # no fundo do menu fica a próxima partida
-        opcoes = [("INICIAR", self.iniciar), ("RECORDES", self.ver_recordes), ("SAIR", self.sair)]
+        opcoes = [("INICIAR", self.iniciar), ("LOJA", self.abrir_loja),
+                  ("RECORDES", self.ver_recordes), ("SAIR", self.sair)]
         if self.partida.comecou:
             opcoes.insert(0, ("CONTINUAR", self.continuar))
         self._abrir(Estado.MENU, opcoes)
 
     def iniciar(self) -> None:
-        """INICIAR, JOGAR e R. A partida guardada é descartada sem entrar nos recordes."""
+        """
+        INICIAR, JOGAR e R. A partida guardada é descartada: não entra nos recordes e
+        as moedas dela não vão para a carteira.
+        """
         if self.partida.comecou:
             self.partida = Partida()
         self.estado = Estado.JOGANDO
@@ -147,10 +160,21 @@ class Jogo:
         self.estado = self.estado_anterior
 
     def ver_recordes(self) -> None:
-        self._abrir(Estado.RECORDES, [("INICIO", self.fechar_recordes)])
+        self._abrir(Estado.RECORDES, [("INICIO", self.voltar_ao_menu)])
 
-    def fechar_recordes(self) -> None:
-        self.estado = Estado.MENU   # a seta do menu continua em RECORDES
+    def abrir_loja(self) -> None:
+        """Uma opção por skin, e INICIO no fim. A seta começa na skin em uso."""
+        opcoes = [(skin.nome, partial(self.escolher_skin, skin)) for skin in SKINS]
+        self._abrir(Estado.LOJA, [*opcoes, ("INICIO", self.voltar_ao_menu)])
+        self.menus[Estado.LOJA].escolhida = SKINS.index(self.loja.escolhida)
+
+    def escolher_skin(self, skin: Skin) -> None:
+        """Usa a skin; se ainda não é dela, compra antes. Sem moedas, o saldo fica vermelho."""
+        if not self.loja.escolher(skin):
+            self.aviso_saldo = AVISO_SEM_SALDO
+
+    def voltar_ao_menu(self) -> None:
+        self.estado = Estado.MENU   # a seta do menu continua onde estava
 
     def sair(self) -> None:
         glfw.set_window_should_close(self.janela, True)
@@ -176,26 +200,38 @@ class Jogo:
     # -------------------------------------------------------------- cada quadro
     def atualizar(self, dt: float) -> None:
         self.relogio += dt
+        self.aviso_saldo = max(0.0, self.aviso_saldo - dt)
         if self.estado == Estado.JOGANDO:
             self.partida.atualizar(dt, self.direcao())
             if self.partida.terminou:
                 self.posicao_recorde = self.recordes.registrar(self.partida.pontuacao)
+                # Só a partida que chega ao fim guarda as moedas: abandonar não guarda.
+                self.carteira.depositar(self.partida.moedas_coletadas)
                 self._abrir(Estado.FIM, [("JOGAR", self.iniciar), ("INICIO", self.abrir_menu)])
 
     def desenhar(self) -> None:
         self.render.limpar(FUNDO)
         jogando = self.estado == Estado.JOGANDO
         self.render.atenuar(1.0 if jogando else ATENUACAO_FORA_DO_JOGO)
-        self.partida.desenhar(self.render)
+        if self.estado != Estado.LOJA:   # a vitrine da loja fica sobre o fundo liso
+            self.partida.desenhar(self.render, self.loja.escolhida)
 
         # Daqui para baixo, coordenadas da tela e sem atenuação.
         self.render.usar_tela()
         self.render.atenuar(1.0)
-        self.placar.desenhar_hud(self.partida.pontuacao, self.partida.moedas_coletadas)
+        if self.estado in TELAS_DO_MENU:
+            cor = COR_FIM if self.aviso_saldo else COR_MOEDA
+            self.placar.desenhar_moedas(self.carteira.saldo, cor)
+        else:
+            self.placar.desenhar_hud(self.partida.pontuacao, self.partida.moedas_coletadas)
         match self.estado:
             case Estado.MENU:
                 self.placar.escrever(NOME_JOGO, 0.0, 0.40, 0.13, COR_DESTAQUE, 'centro')
                 self._opcoes(0.0, 0.08)
+            case Estado.LOJA:
+                self.placar.escrever(TEXTO_LOJA, 0.0, 0.74, 0.11, COR_DESTAQUE, 'centro')
+                self.placar.desenhar_loja(self.loja, self.menus[Estado.LOJA].escolhida, 0.52,
+                                          self._pulso(), self.relogio)
             case Estado.RECORDES:
                 self.placar.desenhar_recordes(self.recordes.pontos, None, 0.45, self._pulso())
                 self._opcoes(-0.45, 0.07)

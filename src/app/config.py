@@ -47,21 +47,29 @@ ALTURA_MOLA, ALTURA_MOLA_ESTICADA = 0.04, 0.08
 ESPIRAS_MOLA = 3
 ESPESSURA_TAMPA_MOLA = 0.012
 
-MOEDAS_ATIVAS = True
 CHANCE_MOEDA = 0.25
 RAIO_MOEDA = 0.04
 ALTURA_MOEDA = 0.16
 VEL_GIRO_MOEDA = 4.0
 FLUTUACAO_MOEDA = 0.015
-BONUS_MOEDA = 25
+BONUS_MOEDA = 10
+
+# Loja: as moedas guardadas compram skins para o personagem.
+PRECO_GALAXIA, PRECO_BRASIL, PRECO_ARCO_IRIS = 50, 75, 80
+PRECO_OURO, PRECO_PLATINA = 150, 300
+ESCALA_VITRINE = 1.3     # o personagem na loja, em relação ao tamanho no jogo
+AVISO_SEM_SALDO = 0.8    # segundos com o saldo em vermelho quando faltam moedas
 
 PONTOS_POR_UNIDADE = 10
 ALTURA_DIGITO_HUD = 0.07
 TEXTO_PAUSA, TEXTO_FIM = "PAUSA", "PERDEU"
-TEXTO_RECORDES = "RECORDES"
+TEXTO_RECORDES, TEXTO_LOJA = "RECORDES", "LOJA"
 TOTAL_RECORDES = 5
-# Na raiz do projeto (src/app/config.py -> src/app -> src -> raiz).
-ARQUIVO_RECORDES = Path(__file__).resolve().parents[2] / "recordes.json"
+# Arquivos na raiz do projeto (src/app/config.py -> src/app -> src -> raiz).
+RAIZ = Path(__file__).resolve().parents[2]
+ARQUIVO_RECORDES = RAIZ / "recordes.json"
+ARQUIVO_MOEDAS = RAIZ / "moedas.json"   # só o número de moedas guardadas
+ARQUIVO_SKINS = RAIZ / "skins.json"    # as skins compradas e a escolhida
 ATENUACAO_FORA_DO_JOGO = 0.4
 ESPACO_GRADE = 0.25
 
@@ -79,6 +87,26 @@ COR_MOLA = (0.55, 0.60, 0.68, 1.0)
 COR_MOLA_TAMPA = (0.88, 0.90, 0.94, 1.0)
 COR_MOEDA = (1.0, 0.82, 0.20, 1.0)
 COR_MOEDA_MIOLO = (0.85, 0.60, 0.10, 1.0)
+# Skins: as cores de cada estampa (o desenho está em skins.py).
+CORES_GALAXIA = ((0.03, 0.05, 0.22, 1.0),    # fundo azul-escuro
+                 (1.0, 1.0, 0.92, 1.0))      # estrelas
+CORES_BRASIL = ((0.0, 0.61, 0.23, 1.0),      # faixa de cima
+                (1.0, 0.87, 0.0, 1.0),       # do meio
+                (0.0, 0.25, 0.62, 1.0))      # de baixo
+CORES_ARCO_IRIS = ((0.90, 0.12, 0.14, 1.0),  # vermelho (em cima)
+                   (1.0, 0.50, 0.05, 1.0),   # laranja
+                   (1.0, 0.87, 0.0, 1.0),    # amarelo
+                   (0.15, 0.70, 0.25, 1.0),  # verde
+                   (0.10, 0.45, 0.95, 1.0),  # azul
+                   (0.30, 0.20, 0.70, 1.0),  # anil
+                   (0.62, 0.22, 0.82, 1.0))  # violeta (embaixo)
+CORES_OURO = ((0.95, 0.72, 0.16, 1.0),       # base
+              (0.74, 0.48, 0.07, 1.0),       # sombra
+              (1.0, 0.86, 0.38, 1.0))        # claro
+CORES_PLATINA = ((0.80, 0.82, 0.86, 1.0),
+                 (0.58, 0.61, 0.67, 1.0),
+                 (0.93, 0.94, 0.97, 1.0))
+COR_FAISCA = (1.0, 1.0, 1.0, 1.0)           # o brilho que aparece no metal
 COR_PLACAR = (0.95, 0.95, 0.95, 1.0)
 COR_DESTAQUE = (0.45, 0.90, 0.55, 1.0)
 COR_FIM = (0.95, 0.30, 0.30, 1.0)

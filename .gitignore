@@ -231,5 +231,7 @@ __marimo__/
 # Streamlit
 .streamlit/secrets.toml
 
-# recordes do jogo (gerado ao jogar)
+# dados do jogo (gerados ao jogar): recordes, moedas guardadas e skins
 recordes.json
+moedas.json
+skins.json

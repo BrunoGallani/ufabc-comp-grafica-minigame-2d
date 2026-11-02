@@ -1,20 +1,21 @@
 """
 Pula-Pula: minigame 2D vertical. O personagem quica sozinho nas plataformas,
-a tela só sobe e cair pela borda de baixo encerra a partida.
+a tela só sobe e cair pela borda de baixo encerra a partida. Cada moeda vale
+10 pontos e fica guardada para comprar skins na LOJA do menu.
 
 Executar:
     python src/app/main.py
 
 Teclas:
-    CIMA / BAIXO                  escolhem a opção nos menus
-    ENTER                         confirma a opção escolhida
+    CIMA / BAIXO                  escolhem a opção nos menus e a skin na loja
+    ENTER                         confirma a opção escolhida (na loja, compra ou usa a skin)
     ESQUERDA / DIREITA ou A / D   movem o personagem
     P                             pausa e retoma
     R                             reinicia (começa outra partida na hora)
     V                             liga e desliga o vsync (fps na barra de título)
     F                             liga e desliga a tela cheia
     ESC                           abre o diálogo CONTINUAR / INICIO / SAIR (ESC de novo volta);
-                                  nos recordes, volta ao menu
+                                  nos recordes e na loja, volta ao menu
 """
 import sys
 
