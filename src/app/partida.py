@@ -15,12 +15,13 @@ from config import (
     CAMERA_ATRASO, CAMERA_VEL_MAX, CHANCE_FRAGIL, CHANCE_MOEDA, CHANCE_MOLA, CHANCE_MOVEL,
     COR_GRADE, ESPACO_GRADE, ESPACO_MAX, ESPACO_MIN, LARGURA_JOGADOR, LARGURA_MOLA,
     LARGURA_PLATAFORMA, LINHA_CAMERA, MARGEM_GERACAO, MEIA_ALTURA_TELA, MEIA_LARGURA_TELA,
-    MOEDAS_ATIVAS, PONTOS_POR_UNIDADE, RAIO_MOEDA, VEL_MOVEL, Y_BASE, Par,
+    PONTOS_POR_UNIDADE, RAIO_MOEDA, VEL_MOVEL, Y_BASE, Par,
 )
 from entidades import Jogador, Moeda, Mola, Plataforma, TipoPlataforma
 
 if TYPE_CHECKING:
     from renderizador import Renderizador
+    from skins import Skin
 
 
 def interpolar(par: Par, t: float) -> float:
@@ -115,7 +116,7 @@ class Partida:
             self.plataformas.append(plataforma)
             self.y_ultima = y
 
-            if MOEDAS_ATIVAS and self.aleatorio.random() < CHANCE_MOEDA:
+            if self.aleatorio.random() < CHANCE_MOEDA:
                 fase = self.aleatorio.uniform(0.0, 3.0)
                 self.moedas.append(Moeda(plataforma.x, y + ALTURA_MOEDA, fase))
 
@@ -144,11 +145,13 @@ class Partida:
         self.plataformas = [p for p in self.plataformas if p.y > limite and not p.quebrada]
         self.moedas = [m for m in self.moedas if m.y > limite and not m.coletada]
 
-    def desenhar(self, render: Renderizador) -> None:
+    def desenhar(self, render: Renderizador, skin: Skin) -> None:
         render.usar_camera(self.camera_y)
         primeira = int(np.floor((self.camera_y - MEIA_ALTURA_TELA) / ESPACO_GRADE))
         ultima = int(np.ceil((self.camera_y + MEIA_ALTURA_TELA) / ESPACO_GRADE))
         for k in range(primeira, ultima + 1):
             render.retangulo((0.0, k * ESPACO_GRADE), (2 * MEIA_LARGURA_TELA, 0.004), COR_GRADE)
-        for objeto in (*self.plataformas, *self.moedas, self.jogador):
+        for objeto in (*self.plataformas, *self.moedas):
             objeto.desenhar(render)
+        # O relógio da partida anima a skin: na pausa, ela congela junto com o resto.
+        self.jogador.desenhar(render, skin, self.tempo)

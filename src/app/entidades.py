@@ -12,17 +12,32 @@ import numpy as np
 
 from config import (
     ALTURA_JOGADOR, ALTURA_MOLA, ALTURA_MOLA_ESTICADA, ALTURA_PLATAFORMA, COR_FRAGIL,
-    COR_FRAGIL_BORDA, COR_JOGADOR, COR_MOEDA, COR_MOEDA_MIOLO, COR_MOLA, COR_MOLA_TAMPA,
-    COR_MOVEL, COR_NORMAL, COR_OLHO, COR_PUPILA, ESPESSURA_TAMPA_MOLA, FLUTUACAO_MOEDA,
-    GRAVIDADE, LARGURA_JOGADOR, LARGURA_MOLA, MEIA_LARGURA_TELA, PIXEL, RAIO_MOEDA,
-    VEL_GIRO_MOEDA, VEL_HORIZONTAL, VEL_MOLA, VEL_PULO, VEL_QUEDA_MAX, Par,
+    COR_FRAGIL_BORDA, COR_MOEDA, COR_MOEDA_MIOLO, COR_MOLA, COR_MOLA_TAMPA, COR_MOVEL,
+    COR_NORMAL, COR_OLHO, COR_PUPILA, ESPESSURA_TAMPA_MOLA, FLUTUACAO_MOEDA, GRAVIDADE,
+    LARGURA_JOGADOR, LARGURA_MOLA, MEIA_LARGURA_TELA, PIXEL, RAIO_MOEDA, VEL_GIRO_MOEDA,
+    VEL_HORIZONTAL, VEL_MOLA, VEL_PULO, VEL_QUEDA_MAX, Par,
 )
+from skins import desenhar_corpo
 
 if TYPE_CHECKING:
     from renderizador import Renderizador
+    from skins import Skin
 
 # O jogador só reaparece do outro lado depois de sair inteiro da tela.
 LIMITE_X_JOGADOR = MEIA_LARGURA_TELA + LARGURA_JOGADOR / 2
+
+
+def desenhar_personagem(render: Renderizador, centro: Par, skin: Skin, tempo: float,
+                        olhar: Par = (0.0, 0.0), escala: float = 1.0) -> None:
+    """O corpo com a skin e os olhos, em qualquer lugar e tamanho (no jogo e na loja)."""
+    x, y = centro
+    desenhar_corpo(render, centro, (LARGURA_JOGADOR * escala, ALTURA_JOGADOR * escala),
+                   skin, tempo)
+    for lado in (-1.0, 1.0):
+        olho = (x + lado * 0.026 * escala, y + 0.025 * escala)
+        render.circulo(olho, 0.02 * escala, COR_OLHO)
+        pupila = (olho[0] + olhar[0] * escala, olho[1] + olhar[1] * escala)
+        render.circulo(pupila, 0.01 * escala, COR_PUPILA)
 
 
 @dataclass(eq=False)
@@ -53,14 +68,10 @@ class Jogador:
         self.y = topo + ALTURA_JOGADOR / 2
         self.vy = velocidade
 
-    def desenhar(self, render: Renderizador) -> None:
-        render.retangulo((self.x, self.y), (LARGURA_JOGADOR, ALTURA_JOGADOR), COR_JOGADOR)
-        olhar_x = 0.008 * self.ultima_direcao
-        olhar_y = 0.006 * max(-1.0, min(1.0, self.vy / VEL_PULO))
-        for lado in (-1.0, 1.0):
-            olho = (self.x + lado * 0.026, self.y + 0.025)
-            render.circulo(olho, 0.02, COR_OLHO)
-            render.circulo((olho[0] + olhar_x, olho[1] + olhar_y), 0.01, COR_PUPILA)
+    def desenhar(self, render: Renderizador, skin: Skin, tempo: float) -> None:
+        # As pupilas olham para onde ele vai e acompanham a subida e a queda.
+        olhar = (0.008 * self.ultima_direcao, 0.006 * max(-1.0, min(1.0, self.vy / VEL_PULO)))
+        desenhar_personagem(render, (self.x, self.y), skin, tempo, olhar)
 
 
 class TipoPlataforma(Enum):
