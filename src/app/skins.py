@@ -36,7 +36,7 @@ class Skin:
     nome: str                # o que aparece na loja e vai para o arquivo
     preco: int
     estampa: Estampa
-    cores: tuple[Cor, ...]   # quantas e para quê depende da estampa (config.py)
+    cores: tuple[Cor, ...]   # quantas e para quê depende da estampa
 
 
 SKINS = (

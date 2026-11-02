@@ -1,4 +1,4 @@
-"""Lista de opções das telas: as setas escolhem e o ENTER executa a escolhida."""
+"""Lista de opções das telas: CIMA e BAIXO escolhem e ENTER ou ESPAÇO executa a escolhida."""
 from __future__ import annotations
 
 from collections.abc import Callable

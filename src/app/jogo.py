@@ -46,7 +46,7 @@ TELAS_SEM_CENA = (Estado.LOJA, Estado.TUTORIAL)
 
 TECLAS_DIREITA = (glfw.KEY_RIGHT, glfw.KEY_D)
 TECLAS_ESQUERDA = (glfw.KEY_LEFT, glfw.KEY_A)
-TECLAS_ENTER = (glfw.KEY_ENTER, glfw.KEY_KP_ENTER, glfw.KEY_SPACE)
+TECLAS_CONFIRMAR = (glfw.KEY_ENTER, glfw.KEY_KP_ENTER, glfw.KEY_SPACE)
 
 
 class Jogo:
@@ -78,7 +78,7 @@ class Jogo:
             glfw.KEY_F: self.alternar_tela_cheia,
             glfw.KEY_P: self.alternar_pausa,
             glfw.KEY_R: self.reiniciar,
-            **dict.fromkeys(TECLAS_ENTER, self.confirmar),
+            **dict.fromkeys(TECLAS_CONFIRMAR, self.confirmar),
         }
 
     # ------------------------------------------------------------------ teclado
@@ -98,7 +98,10 @@ class Jogo:
             menu.confirmar()
 
     def voltar(self) -> None:
-        """ESC abre o diálogo (CONTINUAR, INICIO, SAIR); de novo, fecha e volta para onde estava."""
+        """
+        ESC: nos recordes, na loja e no tutorial, volta ao menu; na partida, abre o
+        diálogo (CONTINUAR, INICIO, SAIR), e de novo o fecha.
+        """
         match self.estado:
             case Estado.DIALOGO:
                 self.continuar()
