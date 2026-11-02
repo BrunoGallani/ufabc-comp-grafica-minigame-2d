@@ -40,7 +40,7 @@ TELAS_DO_MENU = (Estado.MENU, Estado.LOJA, Estado.RECORDES)
 
 TECLAS_DIREITA = (glfw.KEY_RIGHT, glfw.KEY_D)
 TECLAS_ESQUERDA = (glfw.KEY_LEFT, glfw.KEY_A)
-TECLAS_ENTER = (glfw.KEY_ENTER, glfw.KEY_KP_ENTER)
+TECLAS_ENTER = (glfw.KEY_ENTER, glfw.KEY_KP_ENTER, glfw.KEY_SPACE)
 
 
 class Jogo:
@@ -86,8 +86,10 @@ class Jogo:
             menu.mover(passo)
 
     def confirmar(self) -> None:
-        """ENTER executa a opção escolhida, nas telas que têm lista."""
-        if menu := self.menus.get(self.estado):
+        """ENTER executa a opção escolhida, nas telas que têm lista; na pausa, retoma."""
+        if self.estado == Estado.PAUSADO:
+            self.estado = Estado.JOGANDO
+        elif menu := self.menus.get(self.estado):
             menu.confirmar()
 
     def voltar(self) -> None:
