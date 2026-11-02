@@ -1,6 +1,6 @@
 """
-Estados do jogo (menu, loja, recordes, jogando, pausa, fim e o diálogo do ESC),
-teclado e o que cada tela mostra.
+Estados do jogo (menu, loja, recordes, tutorial, jogando, pausa, fim e o diálogo
+do ESC), teclado e o que cada tela mostra.
 """
 from enum import Enum
 from functools import partial
@@ -13,20 +13,24 @@ from carteira import Carteira
 from config import (
     ALTURA_JANELA, ATENUACAO_FORA_DO_JOGO, AVISO_SEM_SALDO, COR_DESTAQUE, COR_FIM, COR_MOEDA,
     COR_PLACAR, FUNDO, LARGURA_JANELA, NOME_JOGO, TEXTO_FIM, TEXTO_LOJA, TEXTO_PAUSA,
+    TEXTO_TUTORIAL,
 )
+from display import Display
 from loja import Loja
-from menu import Menu, Opcao
+from menu import Menu, Opcao, desenhar_opcoes
 from partida import Partida
 from placar import Placar
 from recordes import Recordes
 from renderizador import Renderizador
 from skins import SKINS, Skin
+from tutorial import desenhar_tutorial
 
 
 class Estado(Enum):
     MENU = "menu"
     LOJA = "loja"
     RECORDES = "recordes"
+    TUTORIAL = "tutorial"
     JOGANDO = "jogando"
     PAUSADO = "pausado"
     FIM = "fim de jogo"
@@ -36,7 +40,9 @@ class Estado(Enum):
 # P só alterna entre jogando e pausado; nos outros estados não faz nada.
 PAUSA = {Estado.JOGANDO: Estado.PAUSADO, Estado.PAUSADO: Estado.JOGANDO}
 # Fora da partida, o canto do placar mostra as moedas guardadas na carteira.
-TELAS_DO_MENU = (Estado.MENU, Estado.LOJA, Estado.RECORDES)
+TELAS_DO_MENU = (Estado.MENU, Estado.LOJA, Estado.RECORDES, Estado.TUTORIAL)
+# A vitrine da loja e as teclas do tutorial ficam sobre o fundo liso, sem a cena.
+TELAS_SEM_CENA = (Estado.LOJA, Estado.TUTORIAL)
 
 TECLAS_DIREITA = (glfw.KEY_RIGHT, glfw.KEY_D)
 TECLAS_ESQUERDA = (glfw.KEY_LEFT, glfw.KEY_A)
@@ -47,7 +53,8 @@ class Jogo:
     def __init__(self, ctx: moderngl.Context, janela: 'glfw._GLFWwindowPointerT') -> None:
         self.janela = janela
         self.render = Renderizador(ctx)
-        self.placar = Placar(self.render)
+        self.display = Display(self.render)   # o texto de todas as telas
+        self.placar = Placar(self.display)
         self.recordes = Recordes()
         self.carteira = Carteira()
         self.loja = Loja(self.carteira)
@@ -86,7 +93,7 @@ class Jogo:
             menu.mover(passo)
 
     def confirmar(self) -> None:
-        """ENTER executa a opção escolhida, nas telas que têm lista; na pausa, retoma."""
+        """ENTER/ESPAÇO executa a opção escolhida, nas telas que têm lista; na pausa, retoma."""
         if self.estado == Estado.PAUSADO:
             self.estado = Estado.JOGANDO
         elif menu := self.menus.get(self.estado):
@@ -97,7 +104,7 @@ class Jogo:
         match self.estado:
             case Estado.DIALOGO:
                 self.continuar()
-            case Estado.RECORDES | Estado.LOJA:
+            case Estado.RECORDES | Estado.LOJA | Estado.TUTORIAL:
                 self.voltar_ao_menu()
             case Estado.MENU:
                 pass   # para sair do jogo, a opção SAIR
@@ -142,8 +149,9 @@ class Jogo:
         """Menu principal. Com uma partida guardada (começou e não acabou), oferece CONTINUAR."""
         if self.partida.terminou:
             self.partida = Partida()   # no fundo do menu fica a próxima partida
-        opcoes = [("INICIAR", self.iniciar), ("LOJA", self.abrir_loja),
-                  ("RECORDES", self.ver_recordes), ("SAIR", self.sair)]
+        opcoes = [("INICIAR", self.iniciar), ("TUTORIAL", self.ver_tutorial),
+                  ("LOJA", self.abrir_loja), ("RECORDES", self.ver_recordes),
+                  ("SAIR", self.sair)]
         if self.partida.comecou:
             opcoes.insert(0, ("CONTINUAR", self.continuar))
         self._abrir(Estado.MENU, opcoes)
@@ -163,6 +171,9 @@ class Jogo:
 
     def ver_recordes(self) -> None:
         self._abrir(Estado.RECORDES, [("INICIO", self.voltar_ao_menu)])
+
+    def ver_tutorial(self) -> None:
+        self._abrir(Estado.TUTORIAL, [("INICIO", self.voltar_ao_menu)])
 
     def abrir_loja(self) -> None:
         """Uma opção por skin, e INICIO no fim. A seta começa na skin em uso."""
@@ -215,7 +226,7 @@ class Jogo:
         self.render.limpar(FUNDO)
         jogando = self.estado == Estado.JOGANDO
         self.render.atenuar(1.0 if jogando else ATENUACAO_FORA_DO_JOGO)
-        if self.estado != Estado.LOJA:   # a vitrine da loja fica sobre o fundo liso
+        if self.estado not in TELAS_SEM_CENA:
             self.partida.desenhar(self.render, self.loja.escolhida)
 
         # Daqui para baixo, coordenadas da tela e sem atenuação.
@@ -228,25 +239,29 @@ class Jogo:
             self.placar.desenhar_hud(self.partida.pontuacao, self.partida.moedas_coletadas)
         match self.estado:
             case Estado.MENU:
-                self.placar.escrever(NOME_JOGO, 0.0, 0.40, 0.13, COR_DESTAQUE, 'centro')
-                self._opcoes(0.0, 0.08)
+                self.display.escrever(NOME_JOGO, 0.0, 0.48, 0.13, COR_DESTAQUE, 'centro')
+                self._opcoes(0.12, 0.08)
             case Estado.LOJA:
-                self.placar.escrever(TEXTO_LOJA, 0.0, 0.74, 0.11, COR_DESTAQUE, 'centro')
-                self.placar.desenhar_loja(self.loja, self.menus[Estado.LOJA].escolhida, 0.52,
-                                          self._pulso(), self.relogio)
+                self.display.escrever(TEXTO_LOJA, 0.0, 0.74, 0.11, COR_DESTAQUE, 'centro')
+                self.loja.desenhar(self.render, self.display, self.menus[Estado.LOJA].escolhida,
+                                   0.52, self._pulso(), self.relogio)
             case Estado.RECORDES:
-                self.placar.desenhar_recordes(self.recordes.pontos, None, 0.45, self._pulso())
+                self.recordes.desenhar(self.render, self.display, None, 0.45, self._pulso())
                 self._opcoes(-0.45, 0.07)
+            case Estado.TUTORIAL:
+                self.display.escrever(TEXTO_TUTORIAL, 0.0, 0.74, 0.11, COR_DESTAQUE, 'centro')
+                desenhar_tutorial(self.render, self.display, 0.52)
+                self._opcoes(-0.86, 0.07)
             case Estado.PAUSADO:
                 for lado in (-1.0, 1.0):
                     self.render.retangulo((0.06 * lado, 0.08), (0.07, 0.26), COR_PLACAR)
-                self.placar.escrever(TEXTO_PAUSA, 0.0, -0.22, 0.12, COR_PLACAR, 'centro')
+                self.display.escrever(TEXTO_PAUSA, 0.0, -0.22, 0.12, COR_PLACAR, 'centro')
             case Estado.FIM:
-                self.placar.escrever(TEXTO_FIM, 0.0, 0.70, 0.11, COR_FIM, 'centro')
-                self.placar.escrever(str(self.partida.pontuacao), 0.0, 0.48, 0.16,
-                                     COR_PLACAR, 'centro')
-                self.placar.desenhar_recordes(self.recordes.pontos, self.posicao_recorde,
-                                              0.22, self._pulso())
+                self.display.escrever(TEXTO_FIM, 0.0, 0.70, 0.11, COR_FIM, 'centro')
+                self.display.escrever(str(self.partida.pontuacao), 0.0, 0.48, 0.16,
+                                      COR_PLACAR, 'centro')
+                self.recordes.desenhar(self.render, self.display, self.posicao_recorde, 0.22,
+                                       self._pulso())
                 self._opcoes(-0.62, 0.07)
             case Estado.DIALOGO:
                 # Caixa da cor do fundo: esconde a cena atrás das opções.
@@ -256,7 +271,8 @@ class Jogo:
 
     def _opcoes(self, y: float, altura: float) -> None:
         menu = self.menus[self.estado]
-        self.placar.desenhar_opcoes(menu.textos, menu.escolhida, y, altura, self._pulso())
+        desenhar_opcoes(self.render, self.display, menu.textos, menu.escolhida, y, altura,
+                        self._pulso())
 
     def _pulso(self) -> float:
         return 1.0 + 0.12 * np.sin(2.0 * np.pi * 1.2 * self.relogio)
