@@ -66,7 +66,7 @@ def executar(jogo: Jogo, janela: 'glfw._GLFWwindowPointerT') -> None:
         jogo.atualizar(dt)
         jogo.desenhar()
         glfw.swap_buffers(janela)
-        glfw.poll_events()   # é aqui que o GLFW chama jogo.tecla
+        glfw.poll_events()   # é aqui que o GLFW chama os callbacks (tecla e redimensionar)
 
         quadros += 1
         if agora - marco >= 0.5:

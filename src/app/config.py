@@ -87,7 +87,7 @@ COR_MOLA = (0.55, 0.60, 0.68, 1.0)
 COR_MOLA_TAMPA = (0.88, 0.90, 0.94, 1.0)
 COR_MOEDA = (1.0, 0.82, 0.20, 1.0)
 COR_MOEDA_MIOLO = (0.85, 0.60, 0.10, 1.0)
-# Skins: as cores de cada estampa (o desenho está em skins.py).
+# Skins: as cores de cada estampa.
 CORES_GALAXIA = ((0.03, 0.05, 0.22, 1.0),    # fundo azul-escuro
                  (1.0, 1.0, 0.92, 1.0))      # estrelas
 CORES_BRASIL = ((0.0, 0.61, 0.23, 1.0),      # faixa de cima
@@ -113,7 +113,7 @@ COR_FIM = (0.95, 0.30, 0.30, 1.0)
 
 assert max(ESPACO_MAX) < ALTURA_PULO, "plataforma fora do alcance do pulo"
 assert VEL_MOLA > VEL_PULO, "a mola tem que pular mais alto que a plataforma"
-# No eixo vertical a moeda usa o corpo varrido entre dois quadros (partida.py),
-# então não há tunelamento nem com a velocidade da mola.
+# No eixo vertical a moeda usa o corpo varrido entre dois quadros, então não há
+# tunelamento nem com a velocidade da mola.
 assert VEL_HORIZONTAL * DT_MAXIMO < LARGURA_JOGADOR + 2 * RAIO_MOEDA, \
     "passo horizontal maior que a região de contato com a moeda (tunelamento)"
